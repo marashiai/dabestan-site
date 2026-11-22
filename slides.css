@@ -1,0 +1,228 @@
+/* Look of the slide decks: warm paper, deep turquoise and saffron, Shabnam, photos instead of emoji.
+   Sizes are in em so the fit-to-slide script can shrink a slide's body in one place. */
+
+/* Shabnam (Saber Rastikerdar, SIL OFL; licence in fonts/shabnam/), served by our own site rather than a font CDN.
+   It has regular and bold: weights 600 to 900 show the bold. */
+@font-face { font-family: "Shabnam"; src: url(fonts/shabnam/Shabnam.woff2) format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Shabnam"; src: url(fonts/shabnam/Shabnam-Bold.woff2) format("woff2"); font-weight: 700; font-display: swap; }
+
+:root {
+  --accent: #17695a;
+  --accent-dark: #0f4d41;
+  --accent-soft: #e3efea;
+  --saffron: #e2a33a;
+  --saffron-soft: #fbf0da;
+  --saffron-ink: #8a5800;
+  --ink: #1f2328;
+  --ink-soft: #3a3e45;
+  --muted: #74787f;
+  --paper: #faf7f1;
+  --card: #ffffff;
+  --line: #e9e2d4;
+  --green: #2e8b57; --green-soft: #dcefe4;
+  --yellow: #b8860b; --yellow-soft: #fbefc9;
+  --red: #c0392b; --red-soft: #f8e1dd;
+  --shadow: 0 8px 24px rgba(60, 45, 20, 0.10);
+
+  --r-background-color: var(--paper);
+  --r-main-font: "Shabnam", system-ui, sans-serif;
+  --r-main-font-size: 34px;
+  --r-main-color: var(--ink);
+  --r-heading-font: "Shabnam", system-ui, sans-serif;
+  --r-heading-color: var(--accent);
+  --r-heading-font-weight: 800;
+  --r-heading-line-height: 1.35;
+  --r-heading-text-transform: none;
+  --r-heading-letter-spacing: normal;
+  --r-link-color: var(--accent);
+  --r-selection-background-color: #ffd24d;
+  --r-selection-color: var(--ink);
+}
+
+/* reveal.js gives right-to-left slides and their headings font-family: sans-serif, which would show the system font. */
+.reveal.rtl .slides { font-family: var(--r-main-font); }
+.reveal.rtl .slides :is(h1, h2, h3, h4, h5, h6) { font-family: var(--r-heading-font); }
+
+/* ---------- Frame: part label, title, body. Same place on every slide. ---------- */
+.reveal .slides section { text-align: right; box-sizing: border-box; padding: 6px 30px 0; }
+.reveal .slides section > .kicker { margin: 0 0 0.1em; min-height: 1.5em; font-size: 0.6em; font-weight: 700; color: var(--muted); }
+.reveal .slides section > h2 { font-size: 1.5em; margin: 0 0 0.7em; }
+.reveal .slides section > h2::after { content: ""; display: block; width: 2em; height: 0.13em; margin-top: 0.25em; border-radius: 99px; background: var(--saffron); }
+.reveal .slides section > .body { display: flow-root; }
+.reveal p { line-height: 1.75; margin: 0 0 0.6em; }
+.reveal .body > p { color: var(--ink-soft); }
+.reveal .body > p.lead { font-size: 1.15em; font-weight: 700; color: var(--ink); line-height: 1.6; }
+
+/* A slide with a single sentence (and no picture) says it big. */
+.reveal .slides section > .body:not(:has(.widget)) > p:only-of-type { font-size: 1.4em; font-weight: 800; color: var(--ink); line-height: 1.6; margin-top: 0.6em; }
+
+/* Exercise tag ("تمرین با گوشی خودتون") and numbered steps ("یک. …"). */
+.tag { display: inline-block; margin-left: 0.45em; padding: 0.05em 0.75em; border-radius: 99px; background: var(--saffron-soft); border: 2px solid var(--saffron); color: var(--saffron-ink); font-size: 0.8em; font-weight: 800; line-height: 1.6; }
+.tag-punct { display: none; }
+.reveal .body > p.tag-only { margin-bottom: 0.7em; }
+.reveal .body > p.step { position: relative; padding-right: 2em; }
+.reveal .body > p.step::before { content: attr(data-n); position: absolute; right: 0; top: 0.18em; width: 1.45em; height: 1.45em; border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: #fff; font-size: 0.85em; font-weight: 800; line-height: 1; }
+.step-word { display: none; }
+
+/* A photo beside the text: the title keeps the full width; under it, photo on the left, text on the right
+   (the body is its own block formatting context, so it sits beside the floated photo). */
+.reveal .slides section.has-photo > figure.photo { position: relative; float: left; width: 40%; height: 575px; margin: 0.15em 40px 0 0; border-radius: 22px; background-size: cover; background-position: center; box-shadow: var(--shadow); }
+.reveal .slides section.has-photo > figure.photo.wide { height: auto; aspect-ratio: 3 / 2; } /* whole photo, no crop */
+
+/* Credit line for photos that need one (not CC0). */
+.credit, .bg-credit { position: absolute; left: 10px; bottom: 8px; padding: 0.1em 0.5em; border-radius: 6px; background: rgba(0, 0, 0, 0.45); color: #fff; font-size: 11px; font-weight: 400; line-height: 1.4; }
+.reveal .slides section > .bg-credit { position: fixed; left: 12px; bottom: 12px; } /* fixed inside the scaled slide = its bottom-left corner */
+.pic-card-photo { position: relative; }
+
+/* Cover and part dividers: full-screen photo, darkened, white text. */
+.reveal section.cover, .reveal section.part { text-align: center; }
+.reveal section.cover h1 { font-size: 2.15em; font-weight: 900; line-height: 1.35; color: #fff; text-shadow: 0 2px 18px rgba(0, 0, 0, 0.35); margin-bottom: 0.5em; }
+.reveal section.cover p { font-size: 1.2em; font-weight: 700; color: #f6dca6; }
+.reveal section.part .kicker { display: inline-block; margin-bottom: 0.5em; padding: 0.1em 0.9em; border-radius: 99px; background: var(--saffron); color: #2a1d00; font-size: 0.85em; font-weight: 800; }
+.reveal section.part h2 { color: #fff; font-size: 2.4em; font-weight: 900; margin: 0; text-shadow: 0 2px 18px rgba(0, 0, 0, 0.35); }
+.reveal section.part h2::after { margin: 0.3em auto 0; }
+
+/* reveal.js chrome. */
+.reveal .controls { color: var(--accent); }
+.reveal .progress { color: var(--saffron); height: 4px; }
+.reveal .slide-number { direction: ltr; font-family: inherit; background: transparent; color: #9a9ea5; right: auto; left: 50%; transform: translateX(-50%); }
+
+/* reveal.js animates every property of hidden steps ("transition: all"), which delays font-size changes and
+   breaks the fit-to-slide measuring. Only fade them. */
+.reveal .slides section .fragment { transition-property: opacity, visibility; }
+
+/* ---------- Comment tool on decks ---------- */
+.reveal mark.cm-mark { background: #ffe9a8; color: inherit; border-bottom: 2px solid #e0a800; }
+.reveal mark.cm-mark.cm-active { background: #ffd24d; }
+/* Right-to-left deck: the comments panel opens on the left so it doesn't cover the start of the text. */
+.cm-panel { right: auto !important; left: 0; border-left: 0 !important; border-right: 1px solid #e4ded3; transform: translateX(-105%) !important; }
+.cm-panel.open { transform: none !important; }
+.cm-toggle { box-shadow: 0 0 0 2px #fff, 0 4px 14px rgba(0, 0, 0, 0.2) !important; }
+
+/* ---------- Interactive parts (widgets.js) ---------- */
+.w-row { display: flex; gap: 0.5em; margin-top: 0.7em; }
+.w-btn { font: inherit; font-size: 0.72em; font-weight: 800; padding: 0.35em 1.3em; border-radius: 99px; border: 2px solid var(--accent); background: var(--accent); color: #fff; cursor: pointer; box-shadow: 0 3px 0 var(--accent-dark); }
+.w-btn:active { transform: translateY(2px); box-shadow: none; }
+.w-btn.w-quiet { background: var(--card); color: var(--accent); box-shadow: none; }
+.w-btn:disabled { opacity: 0.35; cursor: default; }
+
+/* Sentence builder */
+.reveal .sb-sentence { font-size: 1.35em; font-weight: 800; color: var(--ink); min-height: 2.8em; margin-bottom: 0.4em; }
+.sb-options { display: grid; gap: 0.4em; min-height: 5.8em; align-content: start; }
+.sb-option { display: grid; grid-template-columns: 9.5em 1fr 3em; align-items: center; gap: 0.6em; font: inherit; font-size: 0.85em; text-align: right; color: inherit; background: var(--card); border: 2px solid var(--line); border-radius: 14px; padding: 0.3em 0.7em; cursor: pointer; box-shadow: var(--shadow); }
+.sb-option:hover { border-color: var(--accent); }
+.sb-bar { height: 0.6em; background: #efe8da; border-radius: 99px; overflow: hidden; }
+.sb-bar::before { content: ""; display: block; height: 100%; width: calc(var(--p) * 1%); background: var(--accent); border-radius: 99px; }
+.sb-p { font-weight: 800; color: var(--accent); }
+
+/* Timer */
+.widget[data-widget="timer"] { text-align: center; margin-top: 0.3em; }
+.widget[data-widget="timer"] .w-row { justify-content: center; }
+.tm-face { display: inline-block; direction: ltr; unicode-bidi: isolate; font-size: 2.4em; font-weight: 900; color: var(--accent); line-height: 1.2; padding: 0.05em 0.6em; border-radius: 22px; background: var(--card); box-shadow: var(--shadow); }
+.tm-done .tm-face { color: var(--red); }
+
+/* Find the bluff */
+.reveal ol.bl-list { list-style-type: persian; margin: 0 1.3em 0 0; padding: 0; font-size: 0.85em; line-height: 1.6; }
+.bl-item { padding: 0.15em 0.5em; margin: 0.2em 0; border-radius: 12px; border: 2px solid transparent; background: var(--card); cursor: pointer; }
+.bl-item.bl-marked { border-color: var(--red); }
+.bl-revealed .bl-item { background: var(--green-soft); }
+.bl-revealed .bl-item.bl-fake { background: var(--red-soft); }
+.bl-revealed .bl-item.bl-fake::after { content: " ساختگی"; color: var(--red); font-weight: 800; font-size: 0.8em; }
+
+/* Traffic light */
+.tl-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.45em; }
+.tl-card { display: flex; flex-direction: column; justify-content: space-between; gap: 0.35em; font-size: 0.72em; background: var(--card); border: 2px solid var(--line); border-radius: 16px; padding: 0.5em 0.55em; box-shadow: var(--shadow); }
+.tl-text { text-align: center; line-height: 1.5; font-weight: 600; }
+.tl-pick { display: flex; gap: 0.3em; justify-content: center; }
+.tl-chip { font: inherit; font-size: 0.85em; font-weight: 700; padding: 0.05em 0.75em; border-radius: 99px; border: 2px solid; background: var(--card); cursor: pointer; }
+.tl-chip.tl-green { border-color: var(--green); color: var(--green); }
+.tl-chip.tl-yellow { border-color: var(--yellow); color: #8a6508; }
+.tl-chip.tl-red { border-color: var(--red); color: var(--red); }
+.tl-card.tl-green { background: var(--green-soft); border-color: var(--green); }
+.tl-card.tl-yellow { background: var(--yellow-soft); border-color: #d4a017; }
+.tl-card.tl-red { background: var(--red-soft); border-color: var(--red); }
+.tl-card.tl-green .tl-chip.tl-green { background: var(--green); color: #fff; }
+.tl-card.tl-yellow .tl-chip.tl-yellow { background: var(--yellow); color: #fff; }
+.tl-card.tl-red .tl-chip.tl-red { background: var(--red); color: #fff; }
+.tl-rec { visibility: hidden; text-align: center; font-weight: 800; font-size: 0.9em; }
+.tl-revealed .tl-rec { visibility: visible; }
+.tl-rec.tl-green { color: var(--green); } .tl-rec.tl-yellow { color: #8a6508; } .tl-rec.tl-red { color: var(--red); }
+
+/* ---------- Pictures (widgets.js): a picture replaces text wherever it can ---------- */
+.mark svg { display: block; width: 1.3em; height: 1.3em; margin: 0 auto; }
+.mark-tick { color: var(--green); } .mark-cross { color: var(--red); } .mark-blank { color: var(--muted); }
+
+/* QR code to the exercise page: on the left, like a photo, with the instructions beside it */
+.widget[data-widget="qr"] { float: left; width: 330px; margin: 0.1em 40px 0.4em 0; padding: 22px 22px 12px; border-radius: 22px; background: #fff; box-shadow: var(--shadow); text-align: center; }
+.qr-code svg { display: block; width: 100%; height: auto; }
+.reveal .qr-label { margin: 0.5em 0 0; font-size: 0.6em; font-weight: 800; color: var(--accent); }
+
+/* Cards with photos */
+.pic-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(7.5em, 1fr)); gap: 0.6em; margin: 0.2em 0 0.5em; clear: both; }
+.pic-cards.pic-flow { display: flex; align-items: stretch; }
+.pic-flow .pic-card { flex: 1; }
+.pic-arrow { align-self: center; font-size: 1.5em; font-weight: 900; color: var(--saffron); }
+.pic-card { overflow: hidden; background: var(--card); border: 1px solid var(--line); border-radius: 18px; box-shadow: var(--shadow); text-align: center; font-size: 0.88em; line-height: 1.5; padding-bottom: 0.6em; }
+.pic-card-photo { aspect-ratio: 16 / 10; background-size: cover; background-position: center; margin-bottom: 0.45em; }
+.pic-card > div:not(.pic-card-photo) { padding: 0 0.6em; }
+.pic-card-head { color: var(--muted); font-size: 0.78em; font-weight: 700; }
+.pic-card-title { font-weight: 800; color: var(--accent); }
+.pic-card-sub { font-size: 0.86em; margin-top: 0.2em; color: var(--ink-soft); }
+/* "mini" cards: a compact reminder row, the photo beside the text; the label (head) is the point, so it leads. */
+.pic-cards.pic-mini { grid-template-columns: repeat(4, 1fr); gap: 0.45em; }
+.pic-mini .pic-card { display: grid; grid-template-columns: 2.9em 1fr; column-gap: 0.5em; align-content: center; align-items: center; text-align: right; font-size: 0.7em; padding: 0.4em; }
+.pic-mini .pic-card-photo { grid-row: 1 / span 3; width: 2.9em; aspect-ratio: 1; border-radius: 12px; margin: 0; }
+.pic-mini .pic-card > div:not(.pic-card-photo) { padding: 0; }
+.pic-mini .pic-card-head { font-size: 1.05em; font-weight: 800; color: var(--accent); }
+.pic-mini .pic-card-title { font-size: 0.82em; font-weight: 600; color: var(--ink-soft); line-height: 1.45; }
+
+/* Bars (odds, compare): they grow when the slide or step shows */
+.pic-prompt { font-size: 1.35em; font-weight: 900; color: var(--ink); margin-bottom: 0.35em; }
+.pic-bar-row { display: grid; grid-template-columns: 5.5em 1fr 4em; align-items: center; gap: 0.6em; margin: 0.35em 0; }
+.pic-label { font-weight: 700; }
+.pic-track { height: 0.85em; background: #efe8da; border-radius: 99px; overflow: hidden; }
+.pic-fill { height: 100%; width: 0; background: linear-gradient(to left, var(--accent), #2a8a76); border-radius: 99px; transition: width 1.4s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.present .widget:not(.fragment) .pic-fill, .present .widget.fragment.visible .pic-fill { width: calc(var(--w) * 1%); }
+.pic-bar-row:nth-child(3) .pic-fill { transition-delay: 0.15s; }
+.pic-bar-row:nth-child(4) .pic-fill { transition-delay: 0.3s; }
+.pic-bar-row:nth-child(5) .pic-fill { transition-delay: 0.45s; }
+.pic-bar-row:nth-child(6) .pic-fill { transition-delay: 0.6s; }
+.pic-value { font-weight: 800; color: var(--accent); white-space: nowrap; }
+.widget[data-widget="compare"] .pic-bar-row { grid-template-columns: 1fr auto; row-gap: 0.1em; margin: 0.55em 0; }
+.widget[data-widget="compare"] .pic-label { grid-column: 1 / -1; font-size: 0.85em; }
+.widget[data-widget="compare"] .pic-track { height: 1.15em; }
+
+/* The model's desk */
+.pic-desk-label { font-weight: 800; color: #7a5a2e; font-size: 0.75em; margin-top: 0.3em; }
+.pic-desk { min-height: 4.8em; padding: 0.5em; display: flex; flex-wrap: wrap; gap: 0.45em; align-content: flex-start; border-radius: 18px; background: #d9bf8f center / cover; box-shadow: inset 0 0 0 3px rgba(0, 0, 0, 0.06), var(--shadow); }
+.pic-note { background: #fff4a3; box-shadow: 0 3px 6px rgba(0, 0, 0, 0.18); padding: 0.25em 0.6em; font-size: 0.68em; font-weight: 600; transform: rotate(calc(var(--r) * 1deg)); animation: pic-drop 0.35s ease-out; transition: opacity 0.45s, transform 0.45s; }
+.pic-note.pic-faded { opacity: 0.3; }
+.pic-note.pic-gone { opacity: 0; transform: translateY(-1em) scale(0.8); }
+@keyframes pic-drop { from { opacity: 0; transform: translateY(-0.8em); } }
+
+/* Chat bubbles */
+.pic-bubbles { display: grid; gap: 0.55em; clear: both; }
+.pic-bubble { background: var(--card); border: 2px solid var(--line); border-radius: 20px 20px 6px 20px; padding: 0.45em 0.8em; font-size: 0.8em; line-height: 1.65; box-shadow: var(--shadow); }
+.pic-bubble-good { border-color: var(--accent); background: var(--accent-soft); }
+.pic-bubble-label { font-weight: 900; color: var(--muted); font-size: 0.85em; }
+.pic-bubble-good .pic-bubble-label { color: var(--accent); }
+
+/* Exam rules */
+.pic-rules-title { font-weight: 900; color: var(--accent); text-align: center; margin-top: 0.3em; }
+.pic-rules { display: flex; gap: 0.6em; justify-content: center; margin: 0.35em 0; }
+.pic-rule { min-width: 4.6em; padding: 0.4em 1em; text-align: center; background: var(--card); border: 2px solid var(--line); border-radius: 18px; box-shadow: var(--shadow); }
+.pic-rule-label { font-weight: 700; }
+.pic-rule-value { font-size: 1.5em; font-weight: 900; direction: ltr; unicode-bidi: isolate; }
+.pic-rule-minus { border-color: var(--red); background: var(--red-soft); }
+.pic-rule-minus .pic-rule-value { color: var(--red); }
+
+/* Knowledge cutoff timeline */
+.pic-timeline { display: grid; grid-template-columns: 1.4fr auto 1fr; margin: 0.6em 0; font-size: 0.88em; text-align: center; clear: both; }
+.pic-known, .pic-unknown { padding: 0.9em 0.6em; border-radius: 18px; display: grid; align-content: center; gap: 0.3em; }
+.pic-known { background: var(--accent-soft); color: var(--accent-dark); }
+.pic-unknown { background: repeating-linear-gradient(45deg, #f3eee4, #f3eee4 10px, #e9e1d1 10px, #e9e1d1 20px); }
+.pic-cutoff { display: flex; align-items: center; margin: 0 0.35em; padding: 0 0.55em; border-radius: 10px; background: var(--red); color: #fff; font-weight: 900; }
+.pic-tl-text { font-weight: 800; }
+.pic-tl-search { color: var(--accent); font-weight: 800; }
+.pic-tl-search .mark { display: inline-block; vertical-align: -0.2em; margin-left: 0.3em; }
+.pic-tl-search .mark svg { width: 1em; height: 1em; }

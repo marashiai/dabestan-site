@@ -1,0 +1,672 @@
+<!doctype html>
+<!-- The exercise page participants open on their own phones (QR codes on the slides).
+     Published on the public site with the slides: see site/build-pages.mjs. -->
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f6f2ea" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#121614" media="(prefers-color-scheme: dark)">
+<title>دفتر تمرین دبستان</title>
+<style>
+/* Layout: one phone-width column, a sticky row of tabs, one exercise per view (#guess, #builder, #exam, #bluff, #traffic).
+   Same identity as the talk's slides: deep turquoise and saffron on warm paper, Shabnam; the home card is a
+   ruled exercise-notebook page with its margin line on the right, as in a Persian school notebook. */
+/* Shabnam is served by our own site (site/fonts/): ../fonts/ on the public site, /fonts/ on the tailnet site. */
+@font-face { font-family: "Shabnam"; src: url(../fonts/shabnam/Shabnam.woff2) format("woff2"), url(/fonts/shabnam/Shabnam.woff2) format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Shabnam"; src: url(../fonts/shabnam/Shabnam-Bold.woff2) format("woff2"), url(/fonts/shabnam/Shabnam-Bold.woff2) format("woff2"); font-weight: 700; font-display: swap; }
+:root {
+  --bg: #f6f2ea;
+  --surface: #ffffff;
+  --ink: #1f2328;
+  --ink-soft: #3c4047;
+  --muted: #6f6a60;
+  --line: #e6dfd2;
+  --rule: #e9e3d6;
+  --margin: #e5a6a0;
+  --accent: #17695a;
+  --accent-ink: #ffffff;
+  --accent-soft: #e3efea;
+  --saffron: #e2a33a;
+  --saffron-soft: #fbf0da;
+  --saffron-ink: #7a4f00;
+  --track: #ece5d7;
+  --green: #2e8b57; --green-soft: #dcefe4;
+  --yellow: #9a6f05; --yellow-soft: #fbefc9;
+  --red: #c0392b; --red-soft: #f8e1dd;
+  --shadow: 0 6px 20px rgba(60, 45, 20, 0.08);
+  --font: "Shabnam", Tahoma, "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121614; --surface: #1b211f; --ink: #ece8e0; --ink-soft: #d3cec5; --muted: #a39d92;
+    --line: #2c3431; --rule: #252c29; --margin: #7a3f3a;
+    --accent: #43b39b; --accent-ink: #0d1a17; --accent-soft: #1b302b;
+    --saffron: #e9b458; --saffron-soft: #3a2e17; --saffron-ink: #f3cf8b; --track: #2a312e;
+    --green: #5cc08a; --green-soft: #1d3527; --yellow: #e0b54a; --yellow-soft: #3a3115; --red: #ef7b6e; --red-soft: #3d1f1b;
+    --shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #121614; --surface: #1b211f; --ink: #ece8e0; --ink-soft: #d3cec5; --muted: #a39d92;
+  --line: #2c3431; --rule: #252c29; --margin: #7a3f3a;
+  --accent: #43b39b; --accent-ink: #0d1a17; --accent-soft: #1b302b;
+  --saffron: #e9b458; --saffron-soft: #3a2e17; --saffron-ink: #f3cf8b; --track: #2a312e;
+  --green: #5cc08a; --green-soft: #1d3527; --yellow: #e0b54a; --yellow-soft: #3a3115; --red: #ef7b6e; --red-soft: #3d1f1b;
+  --shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  color-scheme: dark;
+}
+
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 18px; line-height: 1.7; }
+/* Hidden views and results stay hidden, even where a rule below gives them a display (e.g. [data-view]). */
+[hidden] { display: none !important; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.wrap { max-width: 560px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+h1, h2, h3, p { margin: 0; }
+h1, h2 { text-wrap: balance; line-height: 1.35; }
+button { font: inherit; color: inherit; }
+button:focus-visible, a:focus-visible { outline: 3px solid var(--saffron); outline-offset: 2px; }
+
+/* Tabs */
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line); }
+.tabs { display: flex; gap: 6px; overflow-x: auto; padding-block: 10px; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tabs a { flex: none; padding: 6px 14px; border-radius: 99px; color: var(--ink-soft); text-decoration: none; font-weight: 700; font-size: 15px; white-space: nowrap; border: 1.5px solid var(--line); background: var(--surface); }
+.tabs a[aria-current="page"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+
+main.wrap { padding-block: 20px 48px; display: grid; gap: 18px; }
+[data-view] { display: grid; gap: 16px; }
+.eyebrow { color: var(--muted); font-size: 14px; font-weight: 700; }
+h2 { font-size: 26px; font-weight: 900; color: var(--accent); }
+.lede { color: var(--ink-soft); }
+.tag { justify-self: start; padding: 2px 12px; border-radius: 99px; background: var(--saffron-soft); border: 1.5px solid var(--saffron); color: var(--saffron-ink); font-size: 14px; font-weight: 800; }
+
+/* Home: a ruled notebook page */
+.notebook { position: relative; border-radius: 18px; padding: 22px 34px 22px 20px; background: var(--surface); box-shadow: var(--shadow);
+  background-image: repeating-linear-gradient(to bottom, transparent 0 33px, var(--rule) 33px 34px); }
+.notebook::before { content: ""; position: absolute; top: 0; bottom: 0; right: 22px; width: 2px; background: var(--margin); }
+.notebook h1 { font-size: 34px; font-weight: 900; color: var(--accent); line-height: 1.5; }
+.notebook p { color: var(--ink-soft); line-height: 34px; }
+.cards { display: grid; gap: 12px; }
+.card { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; align-items: center; padding: 16px; border-radius: 16px; background: var(--surface); border: 1.5px solid var(--line); text-decoration: none; color: inherit; }
+.card .num { grid-row: span 2; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: var(--accent-ink); font-weight: 900; font-size: 20px; }
+.card b { font-size: 19px; font-weight: 800; color: var(--ink); }
+.card span:last-child { color: var(--muted); font-size: 15px; line-height: 1.6; }
+.note { font-size: 15px; color: var(--muted); }
+
+/* Buttons */
+.row { display: flex; flex-wrap: wrap; gap: 10px; }
+.btn { min-height: 48px; padding: 8px 22px; border-radius: 99px; border: 2px solid var(--accent); background: var(--accent); color: var(--accent-ink); font-weight: 800; cursor: pointer; }
+.btn.quiet { background: var(--surface); color: var(--accent); }
+.btn:disabled { opacity: 0.4; cursor: default; }
+
+/* Sentence builder */
+.sentence { padding: 18px; border-radius: 16px; background: var(--surface); box-shadow: var(--shadow); font-size: 24px; font-weight: 800; line-height: 1.6; min-height: 3.4em; }
+.sentence .next { color: var(--saffron); }
+.step { color: var(--muted); font-size: 15px; font-weight: 700; }
+.options { display: grid; gap: 10px; }
+.opt { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) 3.2em; align-items: center; gap: 12px; min-height: 56px; padding: 8px 14px; border-radius: 14px; border: 2px solid var(--line); background: var(--surface); text-align: right; cursor: pointer; }
+.opt:hover { border-color: var(--accent); }
+.opt-text { font-weight: 700; min-width: 0; }
+.opt-bar { height: 10px; border-radius: 99px; background: var(--track); overflow: hidden; }
+.opt-bar i { display: block; height: 100%; width: calc(var(--p) * 1%); border-radius: 99px; background: var(--accent); }
+.opt-p { font-weight: 800; color: var(--accent); font-variant-numeric: tabular-nums; text-align: left; }
+.done { display: grid; gap: 12px; padding: 16px; border-radius: 16px; background: var(--accent-soft); }
+.history { display: grid; gap: 6px; padding: 0; margin: 0; list-style: none; }
+.history li { padding: 8px 12px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); font-size: 16px; }
+
+/* Find the bluff */
+.bubble { padding: 12px 16px; border-radius: 18px; background: var(--surface); border: 1.5px solid var(--line); }
+.bubble.me { justify-self: start; background: var(--accent-soft); border-color: transparent; border-bottom-right-radius: 6px; font-weight: 700; }
+.bubble.bot { display: grid; gap: 8px; border-bottom-left-radius: 6px; }
+.bubble .who { color: var(--muted); font-size: 14px; font-weight: 700; }
+.claim { display: grid; grid-template-columns: 2em 1fr; gap: 8px; align-items: start; width: 100%; padding: 10px 12px; border-radius: 12px; border: 2px solid var(--line); background: var(--bg); text-align: right; line-height: 1.8; cursor: pointer; }
+.claim .n { width: 1.7em; height: 1.7em; border-radius: 50%; display: grid; place-items: center; background: var(--track); font-weight: 800; font-size: 15px; }
+.claim[aria-pressed="true"] { border-color: var(--red); background: var(--red-soft); }
+.claim[aria-pressed="true"] .n { background: var(--red); color: #fff; }
+.claim .verdict { grid-column: 2; font-size: 14px; font-weight: 800; }
+.revealed .claim { cursor: default; }
+.revealed .claim.fake { background: var(--red-soft); }
+.revealed .claim.true { background: var(--green-soft); border-color: var(--line); }
+.revealed .claim.true[aria-pressed="true"] { border-color: var(--red); }
+.revealed .claim.fake .verdict { color: var(--red); }
+.revealed .claim.true .verdict { color: var(--green); }
+.result { display: grid; gap: 8px; padding: 16px; border-radius: 16px; background: var(--saffron-soft); }
+.result b { font-size: 20px; }
+
+/* Traffic light */
+.legend { display: grid; gap: 8px; }
+.legend div { display: grid; grid-template-columns: 1.2em 1fr; gap: 10px; align-items: center; }
+.dot { width: 1.1em; height: 1.1em; border-radius: 50%; }
+.dot.green { background: var(--green); } .dot.yellow { background: var(--saffron); } .dot.red { background: var(--red); }
+.tasks { display: grid; gap: 10px; }
+.task { display: grid; gap: 10px; padding: 14px; border-radius: 16px; background: var(--surface); border: 2px solid var(--line); }
+.task b { font-weight: 800; }
+.task.green { border-color: var(--green); background: var(--green-soft); }
+.task.yellow { border-color: var(--saffron); background: var(--yellow-soft); }
+.task.red { border-color: var(--red); background: var(--red-soft); }
+.chips { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.chip { min-height: 44px; border-radius: 99px; border: 2px solid; background: var(--surface); font-weight: 800; cursor: pointer; }
+.chip.green { border-color: var(--green); color: var(--green); }
+.chip.yellow { border-color: var(--saffron); color: var(--yellow); }
+.chip.red { border-color: var(--red); color: var(--red); }
+.chip[aria-pressed="true"].green { background: var(--green); color: #fff; }
+.chip[aria-pressed="true"].yellow { background: var(--saffron); color: #2a1d00; }
+.chip[aria-pressed="true"].red { background: var(--red); color: #fff; }
+.rec { font-size: 15px; font-weight: 800; }
+.rec.green { color: var(--green); } .rec.yellow { color: var(--yellow); } .rec.red { color: var(--red); }
+.count { color: var(--muted); font-weight: 700; font-size: 15px; }
+
+/* You are the model: the sentence with a blank to fill in, then the model's odds with your word highlighted */
+.guess { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; align-items: center; padding: 16px; border-radius: 16px; background: var(--surface); box-shadow: var(--shadow); }
+.guess label { font-size: 24px; font-weight: 800; }
+.guess input { min-width: 0; min-height: 48px; padding: 6px 12px; border-radius: 12px; border: 2px solid var(--line); background: var(--bg); color: var(--ink); font: inherit; font-size: 22px; font-weight: 800; }
+.guess input:focus { outline: none; border-color: var(--accent); }
+.guess .btn { grid-column: 1 / -1; justify-self: start; }
+.my-word { font-size: 24px; font-weight: 800; }
+.my-word b { color: var(--saffron-ink); }
+.opt.static { cursor: default; }
+.opt.static:hover { border-color: var(--line); }
+.opt.static.picked { border-color: var(--saffron); background: var(--saffron-soft); }
+
+/* Exam game: the scoring rule as three tiles, four answers per question, then crossing out in round two */
+.rules { display: grid; gap: 8px; padding: 14px; border-radius: 16px; background: var(--surface); border: 2px solid var(--line); }
+.rules > b { font-weight: 800; }
+.tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.tile { display: grid; justify-items: center; padding: 6px 4px; border-radius: 12px; background: var(--bg); font-size: 15px; font-weight: 700; color: var(--ink-soft); }
+.tile strong { font-size: 22px; font-weight: 900; color: var(--accent); direction: ltr; unicode-bidi: isolate; }
+.tile.minus { background: var(--red-soft); }
+.tile.minus strong { color: var(--red); }
+.ans { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.ans button { min-height: 44px; padding: 4px; border-radius: 12px; border: 2px solid var(--line); background: var(--bg); font-weight: 800; cursor: pointer; }
+.ans button[aria-pressed="true"] { border-color: var(--accent); background: var(--accent); color: var(--accent-ink); }
+.locked .ans button { cursor: default; }
+.ans button.right { border-color: var(--green); background: var(--green-soft); color: var(--green); }
+.ans button.right[aria-pressed="true"] { background: var(--green); color: #fff; }
+.ans button.wrong[aria-pressed="true"] { border-color: var(--red); background: var(--red); color: #fff; }
+.task.crossed .ans button[aria-pressed="true"] { border-color: var(--track); background: var(--track); color: var(--muted); text-decoration: line-through; }
+.cross { justify-self: start; min-height: 40px; padding: 4px 16px; border-radius: 99px; border: 2px solid var(--red); background: var(--surface); color: var(--red); font-weight: 800; cursor: pointer; }
+.cross[aria-pressed="true"] { background: var(--red); color: #fff; }
+.rec.muted { color: var(--muted); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .opt-bar i { transition: width 0.6s ease-out; }
+  .task, .claim, .chip { transition: background-color 0.2s, border-color 0.2s; }
+}
+</style>
+</head>
+<body>
+
+<div dir="rtl" lang="fa">
+  <header class="top">
+    <nav class="tabs wrap" aria-label="تمرین‌ها">
+      <a href="#start">شروع</a>
+      <a href="#guess">جای مدل</a>
+      <a href="#builder">جمله‌سازی</a>
+      <a href="#exam">امتحان</a>
+      <a href="#bluff">دروغ‌یاب</a>
+      <a href="#traffic">چراغ راهنما</a>
+    </nav>
+  </header>
+
+  <main class="wrap">
+    <!-- Home -->
+    <section data-view="start">
+      <div class="notebook">
+        <h1>دفتر تمرین</h1>
+        <p>تمرین‌های گپ «هوش مصنوعی واقعاً چطوری کار می‌کنه؟». هر تمرین رو وقتی بهش رسیدیم، همین‌جا رو گوشی خودتون انجام بدین.</p>
+      </div>
+      <div class="cards">
+        <a class="card" href="#guess"><span class="num">۱</span><b>شما جای مدل</b><span>جملهٔ «یه فنجون…» رو کامل کنین و با حدس مدل مقایسه کنین.</span></a>
+        <a class="card" href="#builder"><span class="num">۲</span><b>جمله‌سازی، تیکه تیکه</b><span>ببینین مدل چطوری کلمه به کلمه جمله می‌سازه.</span></a>
+        <a class="card" href="#exam"><span class="num">۳</span><b>بازی امتحان</b><span>پنج تا سؤال سخت چهارگزینه‌ای. لازم نیست جوابشونو بدونین.</span></a>
+        <a class="card" href="#bluff"><span class="num">۴</span><b>دروغ با اعتماد به نفس</b><span>جمله‌های ساختگی رو تو جواب یه چت‌بات پیدا کنین.</span></a>
+        <a class="card" href="#traffic"><span class="num">۵</span><b>چراغ راهنما</b><span>به هر کار یه رنگ بدین: سبز، زرد یا قرمز.</span></a>
+      </div>
+      <p class="note">چیزی جایی فرستاده نمی‌شه. هر چی اینجا انتخاب می‌کنین، فقط رو گوشی خودتونه.</p>
+    </section>
+
+    <!-- You are the model -->
+    <section data-view="guess" hidden>
+      <span class="tag">تمرین با گوشی خودتون</span>
+      <h2>شما جای مدل</h2>
+      <p class="lede">این جمله رو کامل کنین. کلمهٔ بعدی چیه؟</p>
+      <form class="guess" id="gs-form">
+        <label for="gs-word">یه فنجون</label>
+        <input id="gs-word" type="text" autocomplete="off" enterkeyhint="done" maxlength="24" placeholder="…">
+        <button class="btn" type="submit">ثبت</button>
+      </form>
+      <div class="done" id="gs-done" hidden>
+        <p class="my-word">یه فنجون <b id="gs-mine"></b></p>
+        <div id="gs-wait">
+          <p>حالا بلند بگینش. بعد حدس مدل رو ببینین.</p>
+          <div class="row"><button class="btn" type="button" id="gs-show">حدس مدل رو نشونم بده</button></div>
+        </div>
+      </div>
+      <div id="gs-model" hidden>
+        <p class="eyebrow">حدس مدل بعد از «یه فنجون»</p>
+        <div class="options" id="gs-bars"></div>
+      </div>
+      <div class="result" id="gs-result" hidden aria-live="polite"></div>
+      <div class="row"><button class="btn quiet" type="button" id="gs-reset">از اول</button></div>
+    </section>
+
+    <!-- Sentence builder -->
+    <section data-view="builder" hidden>
+      <span class="tag">تمرین با گوشی خودتون</span>
+      <h2>جمله‌سازی، تیکه تیکه</h2>
+      <p class="lede">هر قدم یکی از تیکه‌ها رو انتخاب کنین. یا «شانسی» رو بزنین تا گوشی به نسبت درصدا براتون انتخاب کنه.</p>
+      <p class="sentence" id="sb-sentence" aria-live="polite"></p>
+      <p class="step" id="sb-step"></p>
+      <div class="options" id="sb-options"></div>
+      <div class="row">
+        <button class="btn" type="button" id="sb-random">شانسی</button>
+        <button class="btn quiet" type="button" id="sb-reset">از اول</button>
+      </div>
+      <div class="done" id="sb-done" hidden>
+        <p>جمله‌تون آماده‌ست. بلند بخونینش و با جملهٔ بقیه مقایسه کنین.</p>
+        <div class="row">
+          <button class="btn" type="button" id="sb-copy">کپی جمله</button>
+          <button class="btn quiet" type="button" id="sb-again">یه جملهٔ دیگه</button>
+        </div>
+      </div>
+      <div id="sb-history-box" hidden>
+        <p class="eyebrow">جمله‌هایی که تا حالا ساختین</p>
+        <ul class="history" id="sb-history"></ul>
+      </div>
+    </section>
+
+    <!-- Exam game -->
+    <section data-view="exam" hidden>
+      <span class="tag">تمرین با گوشی خودتون</span>
+      <h2>بازی امتحان</h2>
+      <p class="lede" id="ex-lede"></p>
+      <div class="rules" id="ex-rules"></div>
+      <div class="result" id="ex-result" hidden aria-live="polite"></div>
+      <p class="count" id="ex-count"></p>
+      <div class="tasks" id="ex-questions"></div>
+      <div class="row">
+        <button class="btn" type="button" id="ex-next"></button>
+        <button class="btn quiet" type="button" id="ex-reset">از اول</button>
+      </div>
+    </section>
+
+    <!-- Find the bluff -->
+    <section data-view="bluff" hidden>
+      <span class="tag">تمرین با گوشی خودتون</span>
+      <h2>دروغ با اعتماد به نفس</h2>
+      <p class="lede">بعضی از جمله‌های این جواب ساختگیه. پیداشون کنین، بعد جواب رو ببینین.</p>
+      <p class="bubble me">دربارهٔ حافظ بهم بگو.</p>
+      <div class="bubble bot" id="bl-answer"><span class="who">جواب چت‌بات</span></div>
+      <div class="row">
+        <button class="btn" type="button" id="bl-show">جواب رو نشونم بده</button>
+        <button class="btn quiet" type="button" id="bl-reset">دوباره</button>
+      </div>
+      <div class="result" id="bl-result" hidden aria-live="polite"></div>
+      <p class="note">این جواب یه نمونه‌ست که واسه تمرین نوشتیم.</p>
+    </section>
+
+    <!-- Traffic light -->
+    <section data-view="traffic" hidden>
+      <span class="tag">تمرین با گوشی خودتون</span>
+      <h2>چراغ راهنما</h2>
+      <div class="legend">
+        <div><span class="dot green"></span><span><b>سبز:</b> راحت استفاده کن.</span></div>
+        <div><span class="dot yellow"></span><span><b>زرد:</b> استفاده کن، ولی چک کن.</span></div>
+        <div><span class="dot red"></span><span><b>قرمز:</b> از یه منبع رسمی یا یه متخصص بپرس.</span></div>
+      </div>
+      <p class="lede">به هر کار یه رنگ بدین. وقتی همه رنگ گرفتن، پیشنهاد ما رو می‌بینین.</p>
+      <p class="count" id="tl-count"></p>
+      <div class="tasks" id="tl-tasks"></div>
+      <div class="result" id="tl-result" hidden aria-live="polite"></div>
+      <div class="row">
+        <button class="btn quiet" type="button" id="tl-show">پیشنهاد ما رو نشون بده</button>
+        <button class="btn quiet" type="button" id="tl-reset">از اول</button>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+(() => {
+  const fa = (s) => String(s).replace(/\d/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
+  const $ = (id) => document.getElementById(id);
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+  // A copy in random order (Fisher-Yates), so where an answer sits is never a pattern.
+  const shuffle = (list) => { const a = [...list]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+
+  /* ---------- Views: #start, #guess, #builder, #exam, #bluff, #traffic ---------- */
+  const VIEWS = ['start', 'guess', 'builder', 'exam', 'bluff', 'traffic'];
+  function route() {
+    const name = location.hash.slice(1);
+    const view = VIEWS.includes(name) ? name : 'start';
+    document.querySelectorAll('[data-view]').forEach((v) => { v.hidden = v.dataset.view !== view; });
+    document.querySelectorAll('.tabs a').forEach((a) => a.setAttribute('aria-current', a.getAttribute('href') === '#' + view ? 'page' : 'false'));
+    // The tabs scroll sideways on narrow phones: keep the current one in view.
+    document.querySelector('.tabs a[aria-current="page"]')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    window.scrollTo(0, 0);
+  }
+  addEventListener('hashchange', route);
+  route();
+
+  /* ---------- You are the model: finish «یه فنجون…», say it aloud, then compare with the model's odds
+     (the same made-up odds as the slides). Spellings are matched loosely; any other word counts as «بقیه». ---------- */
+  const CUP = [['چای', 62, ['چای', 'چایی']], ['قهوه', 21, ['قهوه']], ['آب', 7, ['آب', 'اب', 'آبجوش']], ['شیر', 4, ['شیر']], ['بقیه', 6, []]];
+  const normWord = (s) => s.replace(/ي/g, 'ی').replace(/ك/g, 'ک').replace(/[\s\u200c.،,!؟?«»"']/g, '').replace(/^(یه|یک)?(فنجون|فنجان)/, '');
+  let cupWord = '', cupShown = false;
+  function drawCup() {
+    $('gs-form').hidden = !!cupWord;
+    $('gs-done').hidden = !cupWord;
+    $('gs-mine').textContent = cupWord;
+    $('gs-wait').hidden = cupShown;
+    $('gs-model').hidden = $('gs-result').hidden = !cupShown;
+    if (!cupShown) return;
+    const hit = CUP.find(([, , spellings]) => spellings.includes(normWord(cupWord))) || CUP[CUP.length - 1];
+    $('gs-bars').replaceChildren(...CUP.map(([word, p]) => {
+      const row = el('div', 'opt static' + (word === hit[0] ? ' picked' : ''));
+      const bar = el('span', 'opt-bar'), fill = el('i');
+      fill.style.setProperty('--p', p);
+      bar.append(fill);
+      row.append(el('span', 'opt-text', word), bar, el('span', 'opt-p', fa(p) + '٪'));
+      return row;
+    }));
+    $('gs-result').replaceChildren(
+      el('b', '', hit[0] === 'بقیه'
+        ? `کلمهٔ شما جزو «بقیه»‌ست: همهٔ کلمه‌های دیگه روی هم، ${fa(hit[1])} بار از ${fa(100)} بار.`
+        : `مدل ${fa(hit[1])} بار از ${fa(100)} بار همین کلمه رو می‌گه.`),
+      el('p', '', 'این عددا رو واسه مثال گذاشتیم، ولی منطقش همینه: مدل کلمه‌ای رو می‌گه که تو متنایی که خونده، بیشتر بعد از «یه فنجون» اومده.'),
+    );
+  }
+  $('gs-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const word = $('gs-word').value.trim();
+    if (!word) { $('gs-word').focus(); return; }
+    cupWord = word; cupShown = false;
+    $('gs-word').blur(); // closes the phone keyboard
+    drawCup();
+  });
+  $('gs-show').addEventListener('click', () => { cupShown = true; drawCup(); });
+  $('gs-reset').addEventListener('click', () => { cupWord = ''; cupShown = false; $('gs-word').value = ''; drawCup(); });
+  drawCup();
+
+  /* ---------- Sentence builder (same word list as the slides; the odds are made up) ---------- */
+  const DATA = {
+    start: 'امروز صبح',
+    first: [
+      { text: 'یه فنجون چای', p: 40, then: [
+        [{ text: 'خوردم', p: 60 }, { text: 'دم کردم', p: 30 }, { text: 'سفارش دادم', p: 10 }],
+        [{ text: 'و رفتم پیاده‌روی', p: 45 }, { text: 'و حالم جا اومد', p: 40 }, { text: 'ولی سرد شد', p: 15 }]] },
+      { text: 'بارون', p: 25, then: [
+        [{ text: 'اومد', p: 70 }, { text: 'گرفت', p: 20 }, { text: 'بند اومد', p: 10 }],
+        [{ text: 'و هوا خنک شد', p: 50 }, { text: 'و چترمو جا گذاشتم', p: 35 }, { text: 'و رنگین‌کمون دراومد', p: 15 }]] },
+      { text: 'گربه‌مون', p: 20, then: [
+        [{ text: 'پرید رو میز', p: 50 }, { text: 'گم شد', p: 30 }, { text: 'آواز خوند', p: 20 }],
+        [{ text: 'و همه رو بیدار کرد', p: 45 }, { text: 'و رفت زیر تخت', p: 35 }, { text: 'و چای منو خورد', p: 20 }]] },
+      { text: 'دیر', p: 15, then: [
+        [{ text: 'بیدار شدم', p: 70 }, { text: 'رسیدم', p: 20 }, { text: 'صبحونه خوردم', p: 10 }],
+        [{ text: 'و از اتوبوس جا موندم', p: 50 }, { text: 'ولی اشکال نداشت', p: 30 }, { text: 'و همه منتظرم بودن', p: 20 }]] },
+    ],
+  };
+  const STEPS = 1 + DATA.first[0].then.length;
+  let chosen = [];
+  const made = [];
+  const nextOptions = () => [DATA.first, ...(chosen[0]?.then || [])][chosen.length];
+  const sentenceText = () => [DATA.start, ...chosen.map((o) => o.text)].join(' ') + '.';
+  const pick = (opts) => {
+    let r = Math.random() * opts.reduce((a, o) => a + o.p, 0);
+    for (const o of opts) if ((r -= o.p) < 0) return o;
+    return opts[opts.length - 1];
+  };
+  function choose(o) {
+    chosen.push(o);
+    if (!nextOptions()) {
+      made.unshift(sentenceText());
+      $('sb-history').replaceChildren(...made.map((s) => el('li', '', s)));
+      $('sb-history-box').hidden = made.length < 2;
+    }
+    drawBuilder();
+  }
+  function drawBuilder() {
+    const next = nextOptions();
+    const s = $('sb-sentence');
+    s.replaceChildren([DATA.start, ...chosen.map((o) => o.text)].join(' ') + (next ? ' ' : '.'));
+    if (next) s.append(el('span', 'next', '…'));
+    $('sb-step').textContent = next ? `قدم ${fa(chosen.length + 1)} از ${fa(STEPS)}: تیکهٔ بعدی چیه؟` : 'جمله کامل شد.';
+    $('sb-options').replaceChildren(...(next || []).map((o) => {
+      const b = el('button', 'opt');
+      b.type = 'button';
+      const bar = el('span', 'opt-bar');
+      const fill = el('i');
+      fill.style.setProperty('--p', o.p);
+      bar.append(fill);
+      b.append(el('span', 'opt-text', o.text), bar, el('span', 'opt-p', fa(o.p) + '٪'));
+      b.addEventListener('click', () => choose(o));
+      return b;
+    }));
+    $('sb-random').disabled = !next;
+    $('sb-done').hidden = !!next;
+    $('sb-copy').textContent = 'کپی جمله';
+  }
+  const restart = () => { chosen = []; drawBuilder(); };
+  $('sb-random').addEventListener('click', () => { const next = nextOptions(); if (next) choose(pick(next)); });
+  $('sb-reset').addEventListener('click', restart);
+  $('sb-again').addEventListener('click', restart);
+  $('sb-copy').addEventListener('click', () => {
+    const text = sentenceText();
+    const done = () => { $('sb-copy').textContent = 'کپی شد'; };
+    const fallback = () => {
+      const r = document.createRange();
+      r.selectNodeContents($('sb-sentence'));
+      const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r);
+      $('sb-copy').textContent = 'متن انتخاب شد، کپیش کنین';
+    };
+    try { navigator.clipboard.writeText(text).then(done, fallback); } catch { fallback(); }
+  });
+  drawBuilder();
+
+  /* ---------- Exam game: five hard questions (same as the slides), first scored without negative marking, then
+     Konkur-style (wrong = minus one), when people may cross out answers they're unsure of. Round two stays hidden
+     until its button is pressed, so it can't change how people answer round one. ---------- */
+  // The options are in a random order (not by size), the same as on the slide, so everyone sees the same list.
+  const QUESTIONS = [
+    { q: 'اختاپوس چند تا قلب داره؟', opts: ['۶', '۳', '۸', '۴'], right: 1 },
+    { q: 'زنبور عسل چند تا چشم داره؟', opts: ['۵', '۳', '۲', '۴'], right: 0 },
+    { q: 'بارداری فیل چند ماه طول می‌کشه؟', opts: ['۳۰ ماه', '۹ ماه', '۳۶ ماه', '۲۲ ماه'], right: 3 },
+    { q: 'برج میلاد چند متره؟', opts: ['۵۱۰ متر', '۳۸۰ متر', '۴۳۵ متر', '۳۱۵ متر'], right: 2 },
+    { q: 'پیانو چند تا کلید داره؟', opts: ['۸۸', '۱۰۲', '۶۱', '۹۶'], right: 0 },
+  ];
+  const exPick = QUESTIONS.map(() => -1), exCross = QUESTIONS.map(() => false);
+  let exPhase = 1; // 1: answering, 2: round two (crossing out), 3: answers shown
+  const exCards = QUESTIONS.map((x, i) => {
+    const card = el('div', 'task');
+    const opts = el('div', 'ans');
+    const buttons = x.opts.map((label, j) => {
+      const b = el('button', '', label);
+      b.type = 'button';
+      b.addEventListener('click', () => { if (exPhase !== 1) return; exPick[i] = exPick[i] === j ? -1 : j; drawExam(); });
+      opts.append(b);
+      return b;
+    });
+    const cross = el('button', 'cross');
+    cross.type = 'button';
+    cross.addEventListener('click', () => { exCross[i] = !exCross[i]; drawExam(); });
+    const verdict = el('p', 'rec');
+    card.append(el('b', '', `${fa(i + 1)}. ${x.q}`), opts, cross, verdict);
+    $('ex-questions').append(card);
+    return { card, buttons, cross, verdict };
+  });
+  const score = (n) => (n < 0 ? 'منفی ' + fa(-n) : fa(n));
+  function drawExam() {
+    const round2 = exPhase > 1;
+    exCards.forEach((c, i) => {
+      const picked = exPick[i], x = QUESTIONS[i];
+      c.card.className = 'task' + (round2 ? ' locked' : '') + (exCross[i] ? ' crossed' : '');
+      c.buttons.forEach((b, j) => {
+        b.setAttribute('aria-pressed', String(picked === j));
+        b.className = exPhase === 3 ? (j === x.right ? 'right' : picked === j ? 'wrong' : '') : '';
+      });
+      c.cross.hidden = exPhase !== 2 || picked < 0;
+      c.cross.setAttribute('aria-pressed', String(exCross[i]));
+      c.cross.textContent = exCross[i] ? 'خط خورد' : 'مطمئن نیستم، خط بزن';
+      c.verdict.hidden = exPhase !== 3;
+      const [text, cls] = picked < 0 ? ['خالی', 'muted']
+        : exCross[i] ? [picked === x.right ? 'خط زدین. جوابتون درست بود.' : 'خط زدین. جوابتون غلط بود.', 'muted']
+        : picked === x.right ? ['درست', 'green'] : ['غلط', 'red'];
+      c.verdict.textContent = text;
+      c.verdict.className = 'rec ' + cls;
+    });
+    $('ex-lede').textContent = exPhase === 1
+      ? 'سؤالا عمداً سختن. لازم نیست جوابشونو بدونین، فقط یه گزینه رو بزنین.'
+      : exPhase === 2
+        ? 'حالا جواب غلط منفی یک داره. هر جوابی که مطمئن نیستین، خط بزنین.'
+        : 'جوابای درست سبز شدن.';
+    const tiles = el('div', 'tiles');
+    for (const [label, value, minus] of [['درست', '+۱'], ['غلط', round2 ? '−۱' : '۰', round2], ['خالی', '۰']]) {
+      const tile = el('div', 'tile' + (minus ? ' minus' : ''));
+      tile.append(el('strong', '', value), el('span', '', label));
+      tiles.append(tile);
+    }
+    $('ex-rules').replaceChildren(el('b', '', round2 ? 'قانون راند دوم، مثل کنکور' : 'قانون راند اول'), tiles);
+    const answered = exPick.filter((p) => p >= 0).length;
+    const count = $('ex-count');
+    count.hidden = exPhase === 3;
+    count.textContent = exPhase === 1 ? `${fa(answered)} از ${fa(QUESTIONS.length)} سؤال جواب دادین.` : `${fa(exCross.filter(Boolean).length)} تا جواب رو خط زدین.`;
+    const next = $('ex-next');
+    next.hidden = exPhase === 3;
+    next.textContent = exPhase === 1 ? 'راند دوم' : 'جوابا رو نشونم بده';
+    const res = $('ex-result');
+    res.hidden = exPhase !== 3;
+    if (exPhase === 3) {
+      // Compare what people did, not just two scores: how many answers they gave in each round and how many were
+      // right, and their Konkur score with and without crossing out. Fewer answers, but more of them right.
+      const isRight = (i) => exPick[i] === QUESTIONS[i].right;
+      const given = QUESTIONS.map((x, i) => i).filter((i) => exPick[i] >= 0);
+      const kept = given.filter((i) => !exCross[i]);
+      const right1 = given.filter(isRight).length, right2 = kept.filter(isRight).length;
+      const konkur = (list) => list.reduce((s, i) => s + (isRight(i) ? 1 : -1), 0);
+      const line = (label, text) => { const p = el('p'); p.append(el('strong', '', label + ': '), text); return p; };
+      res.replaceChildren(
+        line('راند اول', given.length ? `به ${fa(given.length)} تا از ${fa(QUESTIONS.length)} سؤال جواب دادین، ${right1 ? fa(right1) + ' تاش درست بود' : 'هیچ‌کدومش درست نبود'}.` : 'به هیچ سؤالی جواب ندادین.'),
+        line('راند دوم', !kept.length ? 'هیچ جوابی نگه نداشتین.'
+          : right2 === kept.length ? (kept.length === 1 ? 'فقط ۱ جواب نگه داشتین، و درست بود.' : `${fa(kept.length)} تا جواب نگه داشتین، و همه‌ش درست بود.`)
+          : `${fa(kept.length)} تا جواب نگه داشتین، ${right2 ? fa(right2) + ' تاش درست بود' : 'هیچ‌کدومش درست نبود'}.`),
+        el('p', '', kept.length === given.length
+          ? `هیچ جوابی رو خط نزدین، پس با قانون کنکور نمره‌تون ${score(konkur(kept))} شد.`
+          : `با قانون کنکور، اگه هیچی رو خط نمی‌زدین، نمره‌تون ${score(konkur(given))} می‌شد. با خط زدن، ${score(konkur(kept))} شد.`),
+        el('b', '', 'وقتی جواب غلط ضرر داره، گفتن «نمی‌دونم» می‌صرفه. از یه چت‌بات هم همینو می‌خوایم: کمتر جواب بده، ولی درست.'),
+      );
+    }
+  }
+  $('ex-next').addEventListener('click', () => { exPhase = Math.min(3, exPhase + 1); drawExam(); window.scrollTo(0, 0); });
+  $('ex-reset').addEventListener('click', () => { exPick.fill(-1); exCross.fill(false); exPhase = 1; drawExam(); window.scrollTo(0, 0); });
+  drawExam();
+
+  /* ---------- Find the bluff: sentences three, four and seven are made up ---------- */
+  const CLAIMS = [
+    'حافظ شاعرِ قرنِ هشتمِ هجری و اهلِ شیراز بود.',
+    'نامِ کاملِ او خواجه شمس‌الدین محمد حافظ شیرازی است.',
+    'او دیوانش را در سالِ ۷۷۰ هجری در اصفهان به پایان رساند.',
+    'حافظ در جوانی سفیرِ شیراز در دربارِ تیمور بود.',
+    'آرامگاهِ او، حافظیه، در شیراز است.',
+    'گوته، شاعرِ آلمانی، دیوانِ غربی‌شرقی را با الهام از حافظ سرود.',
+    'نخستین ترجمهٔ انگلیسیِ غزل‌های او را ویلیام جونز در سالِ ۱۹۱۲ منتشر کرد.',
+  ];
+  const FAKE = new Set([3, 4, 7]);
+  const answer = $('bl-answer');
+  const claims = CLAIMS.map((text, i) => {
+    const b = el('button', 'claim ' + (FAKE.has(i + 1) ? 'fake' : 'true'));
+    b.type = 'button';
+    b.setAttribute('aria-pressed', 'false');
+    const verdict = el('span', 'verdict');
+    verdict.hidden = true;
+    b.append(el('span', 'n', fa(i + 1)), el('span', '', text), verdict);
+    b.addEventListener('click', () => {
+      if (answer.classList.contains('revealed')) return;
+      b.setAttribute('aria-pressed', b.getAttribute('aria-pressed') === 'true' ? 'false' : 'true');
+    });
+    answer.append(b);
+    return { b, verdict, fake: FAKE.has(i + 1) };
+  });
+  $('bl-show').addEventListener('click', () => {
+    answer.classList.add('revealed');
+    let found = 0, wrong = 0;
+    for (const c of claims) {
+      const marked = c.b.getAttribute('aria-pressed') === 'true';
+      if (marked && c.fake) found += 1;
+      if (marked && !c.fake) wrong += 1;
+      c.verdict.hidden = false;
+      c.verdict.textContent = c.fake ? (marked ? 'ساختگی. درست پیداش کردین.' : 'ساختگی. از دستتون در رفت.') : (marked ? 'این یکی درست بود.' : 'درست');
+    }
+    const r = $('bl-result');
+    r.replaceChildren(
+      el('b', '', `از ${fa(3)} جملهٔ ساختگی، ${fa(found)} تاشو پیدا کردین.`),
+      el('p', '', wrong ? `${fa(wrong)} تا جملهٔ درست رو هم ساختگی فرض کردین.` : 'هیچ جملهٔ درستی رو هم اشتباهی علامت نزدین.'),
+      el('p', '', 'دقت کنین: جمله‌های ساختگی دقیقاً به همون اندازه مطمئن به نظر می‌رسیدن.'),
+    );
+    r.hidden = false;
+    $('bl-show').disabled = true;
+  });
+  $('bl-reset').addEventListener('click', () => {
+    answer.classList.remove('revealed');
+    for (const c of claims) { c.b.setAttribute('aria-pressed', 'false'); c.verdict.hidden = true; }
+    $('bl-result').hidden = true;
+    $('bl-show').disabled = false;
+  });
+
+  /* ---------- Traffic light ---------- */
+  const COLORS = [['green', 'سبز'], ['yellow', 'زرد'], ['red', 'قرمز']];
+  const NAME = Object.fromEntries(COLORS);
+  const TASKS = shuffle([ // a new random order on every load
+    { text: 'دوز یه دارو', rec: 'red' },
+    { text: 'تبریک تولد واسه نوه', rec: 'green' },
+    { text: 'خبرای امروز', rec: 'yellow' },
+    { text: 'یه سؤال حقوقی دربارهٔ قرارداد اجاره', rec: 'red' },
+    { text: 'دستور پخت قورمه‌سبزی', rec: 'green' },
+    { text: 'توضیح نامهٔ ادارهٔ مالیات', rec: 'yellow' },
+  ]);
+  const picks = TASKS.map(() => '');
+  const rows = TASKS.map((t, i) => {
+    const card = el('div', 'task');
+    const chips = el('div', 'chips');
+    const rec = el('p', 'rec ' + t.rec, 'پیشنهاد ما: ' + NAME[t.rec]);
+    rec.hidden = true;
+    const buttons = COLORS.map(([key, label]) => {
+      const c = el('button', 'chip ' + key, label);
+      c.type = 'button';
+      c.setAttribute('aria-pressed', 'false');
+      c.addEventListener('click', () => { picks[i] = picks[i] === key ? '' : key; drawTraffic(); });
+      chips.append(c);
+      return [key, c];
+    });
+    card.append(el('b', '', t.text), chips, rec);
+    $('tl-tasks').append(card);
+    return { card, buttons, rec };
+  });
+  let shown = false;
+  function drawTraffic() {
+    const n = picks.filter(Boolean).length;
+    if (n === TASKS.length) shown = true; // our suggestions appear once every task has a colour
+    rows.forEach((r, i) => {
+      r.card.className = 'task' + (picks[i] ? ' ' + picks[i] : '');
+      r.buttons.forEach(([key, c]) => c.setAttribute('aria-pressed', String(picks[i] === key)));
+      r.rec.hidden = !shown;
+    });
+    $('tl-count').textContent = `${fa(n)} از ${fa(TASKS.length)} رنگ گرفتن.`;
+    const res = $('tl-result');
+    if (shown) {
+      const same = TASKS.filter((t, i) => picks[i] === t.rec).length;
+      res.replaceChildren(
+        el('b', '', `با پیشنهاد ما تو ${fa(same)} تا از ${fa(TASKS.length)} تا هم‌نظر بودین.`),
+        el('p', '', 'جواب قطعی نداره. سر تفاوتا با هم گپ می‌زنیم.'),
+        el('p', '', 'یادتون باشه: هوش مصنوعی جای دکتر، وکیل یا مشاور مالی رو نمی‌گیره. ولی کمکتون می‌کنه سؤالای بهتری آماده کنین.'),
+      );
+    }
+    res.hidden = !shown;
+    $('tl-show').hidden = shown;
+  }
+  $('tl-show').addEventListener('click', () => { shown = true; drawTraffic(); });
+  $('tl-reset').addEventListener('click', () => { picks.fill(''); shown = false; drawTraffic(); });
+  drawTraffic();
+})();
+</script>
